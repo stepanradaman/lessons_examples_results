@@ -1,0 +1,228 @@
+docker -v	                                      Версия Docker Engine
+docker ps	                                       Список Бегущих контейнеров
+docket ps -a	                                    Список ВСЕХ контейнеров
+docker images	                                      Список локальных Images 
+	
+docker search tomcat	                            Найти Image tomcat в DockerHub
+docker pull tomcat	                             Скачать Image tomcat из DockerHub
+docker run -it -p 7777:8080 tomcat	             Запустить интерактивно контейнер  tomcat на порте 7777
+docker run -d -p 8888:8080 tomcat	              Запустить НЕинтерактивно контейнер  tomcat на порте 8888
+docker run -d -p 80:80 nginx	                       Запустить НЕинтерактивно контейнер  nginx на порте 80
+	
+docker tag oldname:v1  newname:v2	               Создать копию Image с другим именем и тагом
+	
+docker build -t myimage:latest .	                Создать Image с именем myimage:latest из локального Dockerfile
+docker run -d myimage:latest	                         Запустить НЕинтерактивно контейнер myimage:latest
+	
+docker rm 1234567890	                                Удалить контейнер с ID 1234567890
+docker rmi 1112227778	                                 Удалит локальный Image с ID 1112227778
+	
+docker exec -it 5267e21d140 /bin/bash	               Запустить интерактивно /bin/bash на контейнере с ID 5267e21d140
+echo "New Version v2" >> /var/www/html/index.html	Изменить файл в контейнере
+exit	Выйти из контейнера
+docker commit 5267e21d140  newimage_v2:latest	        Создать Image с именем newimage_v2:latest из контейнера с ID 5267e21d140
+
+--------------------------------------------------------------
+
+https://www.youtube.com/watch?app=desktop&v=I18TNwZ2Nqg
+https://github.com/adv4000/docker
+
+1. VMware
+2. https://ubuntu.com/download/alternative-downloads   Ubuntu Server 22.04.1 LTS
+3. https://www.youtube.com/watch?v=8cIN0u5Jf1k 
+win-r
+gpedit.msc
+Административные шаблоны
+Система
+2 файл
+Отключить (было "Не задано")
+cmd
+Набор команд: 
+bcdedit /create {0cb3b571-2f2e-4343-a879-d86a476d7215} /d "DebugTool" /application osloader
+bcdedit /set {0cb3b571-2f2e-4343-a879-d86a476d7215} path "\EFI\Microsoft\Boot\SecConfig.efi"
+bcdedit /set {bootmgr} bootsequence {0cb3b571-2f2e-4343-a879-d86a476d7215}
+bcdedit /set {0cb3b571-2f2e-4343-a879-d86a476d7215} loadoptions DISABLE-LSA-ISO,DISABLE-VBS
+bcdedit /set hypervisorlaunchtype off
+
+
+1) установка
+cat /etc/os-release
+sudo apt update
+sudo apt install apt-transport-https
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+sudo apt update
+sudo apt install docker-ce
+sudo systemctl start docker
+docker-v
+sudo systemctl status docker
+sudo usermod -aG docker $USER - чтобы не писать sudo в начале (типа запись в PATH)
+
+exit
+загружаемся заново
+
+2) работа
+docker images
+docker run hello-world
+docker pull tomcat:latest - скачать image
+docker run -d --name tomcat-container1 -p 8082:8080 tomcat - перенаправляем порт
+
+sudo apt install net-tools
+ifconfig
+192.168.77.128
+192.168.77.128:8082 - вылезет ошибка
+https://www.youtube.com/watch?v=vn3aYbkLhmo
+
+---- исправление ошибки
+docker exec -it tomcat-container1 /bin/bash
+ls
+cd webapps.dist (если неправильно делай cd..)
+cp -R * ../webapps/
+ls
+192.168.77.128:8082
+---- исправление ошибки
+
+----------------------nginx
+docker pool id:latest
+docker pool nginx
+docker run -d -p 1237:80 nginx
+а с nginx все збс
+----------------------nginx
+
+docker ps - какие контейнеры в работе
+docker ps -a - показать какие контейнеры когда-либо были в работе
+
+docker run -d --name tomcat-container2 -p 1234:8080 tomcat
+
+----------------------------------------- удаление
+sudo aa-remove-unknown - не может стопать, проблемы с доступом и потом ок
+
+docker stop  # stop container
+docker rm   # delete container
+docker rmi  # delete image
+
+docker rmi $(docker images 'tomcat' -a -q)
+docker kill $(docker ps -q)
+docker rmi $(docker images -q)
+-----------------------------------------
+
+----------------------свои images
+ll - видимо посмотреть папки
+mkdir mydocker
+cd mydocker
+nano Dockerfile
+
+FROM ubuntu:latest
+RUN apt-get -y update
+RUN apt-get -y install apache2
+RUN echo 'Hello World from Docker!' > /var/www/html/index.html
+CMD ["/usr/sbin/apache2ctl", "-D","FOREGROUND"]
+EXPOSE 80
+
+docker build -t stepan:v1 .
+docker run -d --name stepan-container1 -p 7777:80 stepan:v1
+
+----------------------свои images
+
+-----------------------------------------------------------------
+https://www.youtube.com/watch?v=n9uCgUzfeRQ&t=5476s
+
+docker build .
+docker images
+docker run 174ce5b1e4a8 [image id]
+
+------------------------------------------------------
+
+docker pull node
+docker run -it node - и я в ноде
+1+1
+.exit
+
+docker container prune - удалить все контейнеры
+
+
+-----
+создаю проект с git
+https://github.com/vladilenm/logs-app
+npm install
+13 в app.js убрать ??: const port = process.env.PORT || 3000
+делаю Dockerfile
+
+FROM node
+WORKDIR /app // если нет этой строки, то следующая такая: COPY . /app
+COPY . .
+RUN npm install
+EXPOSE 3000
+CMD ["npm", "start"] //  CMD ["node", "app.js"]
+
+docker build .
+docker run cce55019829e - не запустится, нужно с -p
+docker run -p 3000:3000 cce55019829e
+
+docker stop id
+docker container prune
+-----
+
+docker run -d -p 3000:3000 cce55019829e
+docker run -d -p 3000:3000 --name app --rm ff31e5f57366 // --rm удаляет контейнер при остановке
+docker rmi cce55019829e 174ce5b1e4a8 - удаляю список
+docker image prune - удалить все имеджи
+docker build -t app:v1 . // -t имя:версия, если только имя, то версия будет latest
+
+
+------ docker hub
+docker login (stepanradaman mydocker1990)
+docker tag app:v1 stepanradaman/app:v1 - придётся переименовать
+docker push stepanradaman/app:v1
+
+https://hub.docker.com/repository/docker/stepanradaman/app
+docker push stepanradaman/app:v1
+------ docker hub
+
+создаю .dockerignore
+
+--- переменные
+docker run -p 80:4200 -d --rm --name app --env-file ./config/.env app
+
+--- файл Makerun
+https://questu.ru/questions/32127524/
+run:
+    docker run -p 80:4200 -d --rm --name app --env-file ./config/.env app
+
+make run
+
+--- volume - ссылки на внешние данные для контейнеров
+VOLUME ["app/data"] - в Dockerfile
+docker build -t app:volumes .
+docker run -d -p 3000:3000 -v logs:/app/data --rm --name app app:volumes
+добавляю в интерфейсе текст раза 2 (1 и 2)
+docker volume ls
+и текст остаётся
+docker volume inspect logs
+
+[
+    {
+        "CreatedAt": "2022-11-16T13:26:15Z",
+        "Driver": "local",
+        "Labels": null,
+        "Mountpoint": "/var/lib/docker/volumes/logs/_data",
+        "Name": "logs",
+        "Options": null,
+        "Scope": "local"
+    }
+]
+
+docker volume prune
+
+по-другому:
+docker volume create logs
+
+---run-dev - кароч, эта штука позволяет обновлять файлы и не переделывать имедж
+docker run -d -p 3000:3000 -v D:/TEST/docker/2/node:/app -v /app/node_modules -v logs:/app/data --rm --name app app:volumes
+
+-- сохранить на комп
+docker save -o app.tar app:v1
+docker load -i app.tar
+
+docker run -d -p 3000:3000 --rm --name app app:v1
+
