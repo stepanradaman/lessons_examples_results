@@ -1,0 +1,186 @@
+https://www.youtube.com/watch?v=LNvmI8a9jwY
+https://www.mongodb.com/try/download/community
+
+mongodb://localhost:27017
+
+чтобы не писать скрипты заново - стрелки на клаве (вверх-вниз)
+
+--- посмотреть базы
+show databases;
+
+--- создание базы и коллекции
+use mongo;
+db.createCollection("users");
+
+--- посмотреть коллекции
+show collections;
+
+--- удалить базу
+db.dropDatabase();
+
+--- добавили юзера
+db.users.insert({
+	name: "john",
+	age: 50
+})
+
+db.users.find();
+
+--- добавили много юзеров
+db.users.insertMany([
+	{name: "name1", age: 20},
+	{name: "name2", age: 21},
+	{name: "name3", age: 22},
+	{name: "name4", age: 23},
+	{name: "name5", age: 24}
+])
+
+db.users.find({name: "name1", age: 20});
+
+--- поиск по id
+db.users.findOne({_id: ObjectId("635baf59ac25f24f8b0edd68"});
+
+--- поиск OR
+db.users.find(
+	{
+		$or:[
+			{name: "name1"}, 
+			{age: 21}
+		]
+	}
+)
+
+--- поиск < чему-то (less then)
+db.users.find(
+	{
+		age: {$lt:30}
+	}
+)
+
+--- поиск <= чему-то (less then or equels)
+db.users.find(
+	{
+		age: {$lte:50}
+	}
+)
+
+--- поиск >= чему-то (greater then or equels)
+db.users.find(
+	{
+		age: {$gte:50}
+	}
+)
+
+--- поиск <> чему-то
+db.users.find(
+	{
+		age: {$ne:50}
+	}
+)
+
+--- сортировка (1 или -1)
+db.users.find().sort(
+	{
+		age: 1
+	}
+)
+
+--- ограничение
+db.users.find().sort({age: 1}).limit(2)
+
+--- обновление
+db.users.update(
+	{name: "john"},
+	{
+		$set: {
+			name: "nameup",
+			age: 30
+		}
+	}
+)
+
+--- обновление названий столбцов
+db.users.updateMany(
+	{},
+	{
+		$rename: {
+			name: "fullname"
+		}
+	}
+)
+
+--- удаление записи
+db.users.deleteOne(
+	{
+		age: 24
+	}
+)
+
+--- скрипт
+db.users.bulkWrite([
+	{
+		insertOne: {
+			document: {name: "name6", age: 25}
+		}
+	},
+	{
+		deleteOne: {
+			filter: {fullname: "name1"}
+		}
+	}
+])
+
+--- связь "один ко многим"
+
+- обновили одну запись
+db.users.update(
+	{fullname: "nameup"},
+	{
+		$set: {
+			posts: [
+				{title: 'javascript', text: 'js top'},
+				{title: 'mongo', text: 'mongo database'}
+			]
+		}
+	}
+)
+
+- поискали юзера, у которого есть post
+db.users.findOne(
+	{fullname: "nameup"},
+	{posts: 1}
+)
+
+- поискали юзера, у которого в посте есть запись "javascript"
+db.users.find(
+	{
+		posts: {
+			$elemMatch: {
+				title: "javascript"
+			}
+		}
+	}
+)
+
+- поискали юзера, у которого в posts заполнены
+db.users.find(
+	{posts: {$exists: true}}
+)
+
+
+----------------------------------------- связи/отношения
+https://www.tutorialspoint.com/mongodb/mongodb_relationships.htm
+
+суть в том, чтобы также нормировать базу;
+например дать коллекцию адресов, а связи давать с помощью id на эти адреса
+
+{
+   "_id":ObjectId("52ffc33cd85242f436000001"),
+   "contact": "987654321",
+   "dob": "01-01-1991",
+   "name": "Tom Benzamin",
+   "address_ids": [
+      ObjectId("52ffc4a5d85242602e000000"),
+      ObjectId("52ffc4a5d85242602e000001")
+   ]
+}
