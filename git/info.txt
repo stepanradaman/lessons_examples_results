@@ -1,0 +1,183 @@
+https://www.youtube.com/playlist?list=PLDyvV36pndZFHXjXuwA_NywNrVQO0aQqb
+
+------------------------------------------------------ общее
+1. cd папка проекта, или правая кнопка Git Bash Here
+
+2. git init (создаем папочку git и ветку master)
+
+3. 
+git config user.name "stepanradaman"
+git config user.email "stepanradaman@gmail.com"
+
+4. посмотреть конфиг
+cat .git/config
+git config --list (ну или так)
+
+5. Если добавить флаг глобал, то данные запишутся в конфиг в Program Data
+git config --global user.name "stepanradaman"
+git config --global user.email "stepanradaman@gmail.com"
+
+6. Если идёт дублирование:
+git config --remove-section user (смотря какая секция)
+
+7. Изменить редактор (кстати важно, в примере sublime)
+git config --global core.editor 'ссылка -w'
+
+8. Псевдонимы
+git config --global alias.c config
+git c --list
+
+git config --global alias.c 'config --global'
+git c --list
+
+Много команд через запятную (и посмотри файл config):
+git config alias.sayhi '!echo "hello"; echo "from git"'
+git sayhi
+
+8. Справка
+git config -h
+git help config
+
+------------------------------------------------------ работа
+1. Посмотреть файлы (в working directory)
+ls
+
+2. Статус
+git status
+
+3. Индексация
+git add test.py (файл добавляется в index, файл создается, если не было)
+
+4. Создаю коммит (заголовок + пробел + пункты)
+git commit -m "Create first doc"
+
+Или сложнее:
+git commit
+
+Create first doc
+
+* add 1
+* add 2
+
+Нажать Esc
+ввести внизу :wq
+Enter
+
+[master (root-commit) 7ed7a15] Create first doc
+ 1 file changed, 1 insertion(+)
+ create mode 100644 test.py
+
+7ed7a15 - id коммита
+100644 - цифры 0-3 - показывает тип записи (100 - это файл); цифры 3-6 показывает права (644 - неисполнимый файл, 755 - исполнимый файл)
+
+git status - проверка статус, всё закомичено
+
+5. Исполнимость / неисполнимость
+chmod +x test.py (для unix систем)
+
+6. Инфа
+git show --pretty=fuller
+
+7. Изменить автора кода (типа идёт разделение автора кода и коммитера)
+git commit --author='StepanRadaman <stepan@gmail.com>' --date='Wed Dec 14 14:31:16 2022 +0300'
+
+----------------- reset
+8. Новые папки и файлы. Добавление всего
+Пустые папки не видит
+Файлы видит
+
+git add .
+
+10. git commit -m "Create second doc"
+
+11. Проще сделать .gitignore, добавить туда то, что не должно быть закомичено. 
+.gitignore доавляем отдельным коммитом
+
+git add .gitignore
+git commit -m "Add gitignore"
+
+------------------------------------------------------ ветки
+1. Информация о ветке
+git branch -v
+
+все ветки здесь: ~\.git\refs\heads
+файл .git\HEAD даёт инфу на какой ветке сейчас находимся
+Коммит-вершина ветки: cat .git/refs/heads/master
+
+2. Создание и пеключение на ветку
+git branch feature
+git checkout feature
+
+3. Пример изменения (пару раз коммиты на ветке feature):
+git commit -am "Create doc 3/4" (сразу add и commit)
+git branch -v
+
+4. Возвратимся на master (содержание файлов автоматически откатилось)
+git checkout master
+
+5. чтобы вернуть master до id какого-то комита нужно, и автоматом сделать ветку, выходящую из нового вертекса масетра:
+git branch -f master [id коммита]
+
+6. Не переводись на отдельный коммит, будет отстой
+git checkout [id коммита]
+
+7. Откат отдельного файла
+git checkout [id коммита] [название файла]
+
+8. Слияние ветки
+git checkout master
+git merge feature
+
+9. Откат слияния (cat .git/ORIG_HEAD (посмотреть))
+git checkout feature
+git branch -f master ORIG_HEAD
+
+10. Удаление ветки (только после слияния)
+git branch -d feature (она ещё остаётся какое-то время в базе, чувак сказал 30 дней)
+git branch -D feature - а это удалит всё из ветки со всем коммитами
+
+11. Лог операций
+cat .git/logs/HEAD
+git reflog
+
+------------------ rebase (типа merge - это ок, но иногда нужно коммиты перенести последовательным копированием с согласованием; странная история, не советую)
+Запуск:
+git rebase master >
+git rebase --abort (чтоб при конфликте откатиться) > 
+git rebase master --continue (в текстовом редакторе правим чего-то)
+git add test.py
+git rebase master --continue
+
+откат: git reset --hard ORIG_HEAD
+
+------------------------------------------------------ Откат
+1. С удалением
+git reset --hard 7c1555d
+
+2. Откат отката
+git reset --hard ORIG_HEAD
+
+3. Откат на последний нормальный закомиченный блок
+git reset --hard HEAD
+
+4. Софт ресет переносит коммит и всю связанную канитель в ветку
+git reset --soft @~ (@ - это HEAD, ~ - на ступень вниз)
+
+------------------------------------------------------ Инфо
+1. Чтобы посмотреть список коммитов (выйти из log: Q + Enter):
+git log .
+git log --oneline
+git show HEAD~ (коммит на 1 коммита назад от HEAD)
+git show HEAD~~ (коммит на 2 коммита назад от HEAD)
+git show HEAD~~~ (коммит на 3 коммита назад от HEAD)
+git show HEAD~~~:test.py (содержание файла test.py коммита, который расположен на 3 коммита назад от HEAD)
+
+2. Что происходило с файлом
+git log test.py
+
+3. Кто написал строку
+git blame test.py
+
+------------------------------------------------------ Push (к примеру, github подскажет)
+git remote add origin https://github.com/stepanradaman/lessons_examples_results.git
+git push -u origin master
